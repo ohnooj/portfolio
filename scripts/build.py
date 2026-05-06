@@ -86,7 +86,7 @@ def render_opening(site: dict) -> str:
           </div>
         </div>
 
-        <figure class="portrait-plate">
+        <figure class="portrait-plate" data-palette-portrait tabindex="0" aria-label="Show portrait color palette samples">
           <img src="{escape(portrait["src"])}" alt="{escape(portrait["alt"])}" />
           <figcaption>{escape(portrait["caption"])}</figcaption>
         </figure>
@@ -166,6 +166,7 @@ def build() -> None:
 
 {chr(10).join(render_section(section) for section in site["sections"])}
     </main>
+    <script src="assets/palette-samples.js" defer></script>
   </body>
 </html>
 """
