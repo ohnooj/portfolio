@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Raycasting Teaching Demo — Three.js</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #0e1117;
+        color: #e5e7eb;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantareell,
+          Noto Sans,
+          Helvetica,
+          Arial;
+      }
+      #app {
+        position: fixed;
+        inset: 0;
+      }
+      .overlay-label {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 6px 8px;
+        border-radius: 8px;
+        font:
+          12px/1.2 system-ui,
+          sans-serif;
+      }
+      .help {
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
+        opacity: 0.75;
+        font-size: 12px;
+      }
+      .help kbd {
+        background: #111827;
+        border: 1px solid #374151;
+        border-bottom-width: 2px;
+        padding: 2px 5px;
+        border-radius: 6px;
+      }
+      /* CSS2D renderer container should not block pointer events */
+      .labels {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+    </style>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <div class="help">
+      Orbit: <kbd>drag</kbd> · Pan: <kbd>right-drag</kbd> · Zoom:
+      <kbd>wheel</kbd>
+    </div>
+    <div id="pixelLabel" class="overlay-label"></div>
+
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+      import { TransformControls } from "three/addons/controls/TransformControls.js";
+      import {
+        CSS2DRenderer,
+        CSS2DObject,
+      } from "three/addons/renderers/CSS2DRenderer.js";
+      import GUI from "https://cdn.jsdelivr.net/npm/lil-gui@0.19/+esm";
+
+      // =================================== SETUP SCENE ======================
+      // -----------------------------------
+      // Renderer(s)
+      // -----------------------------------
+      const container = document.getElementById("app");
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        precision: "lowp",
+      });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.0;
+      container.appendChild(renderer.domElement);
+
+      const labelRenderer = new CSS2DRenderer();
+      labelRenderer.setSize(innerWidth, innerHeight);
+      labelRenderer.domElement.className = "labels";
+      container.appendChild(labelRenderer.domElement);
+
+      // -----------------------------------
+      // Scene & cameras
+      // -----------------------------------
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0e1117);
+
+      const camera = new THREE.PerspectiveCamera(
+        60,
+        innerWidth / innerHeight,
+        0.1,
+        500,
+      );
+      camera.position.set(8, 6, 10);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.target.set(0, 1, 0);
+      controls.update();
+
+      // Lights
+      scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+      const dir = new THREE.DirectionalLight(0xffffff, 1.0);
+      dir.position.set(5, 10, 4);
+      dir.castShadow = true;
+      dir.shadow.mapSize.set(1024, 1024);
+      dir.shadow.camera.near = 1;
+      dir.shadow.camera.far = 60;
+      dir.shadow.camera.left = -20;
+      dir.shadow.camera.right = 20;
+      dir.shadow.camera.top = 20;
+      dir.shadow.camera.bottom = -20;
+      scene.add(dir);
+
+      // -----------------------------------
+      // World axes with labels u,v,w (x,y,z)
+      // -----------------------------------
+      const axes = new THREE.AxesHelper(3);
+      scene.add(axes);
+      const mkLabel = (txt) => {
+        const el = document.createElement("div");
+        el.textContent = txt;
+        el.style.color = "#e5e7eb";
+        el.style.fontSize = "12px";
+        el.style.background = "rgba(0,0,0,.45)";
+        el.style.padding = "2px 4px";
+        el.style.borderRadius = "6px";
+        return new CSS2DObject(el);
+      };
+      const uLabel = mkLabel("u (x)");
+      uLabel.position.set(3.2, 0, 0);
+      scene.add(uLabel);
+      const vLabel = mkLabel("v (y)");
+      vLabel.position.set(0, 3.2, 0);
+      scene.add(vLabel);
+      const wLabel = mkLabel("w (z)");
+      wLabel.position.set(0, 0, 3.2);
+      scene.add(wLabel);
+
+      // -----------------------------------
+      // Scene geometry: ground (y=-0.5), sphere, triangle
+      // -----------------------------------
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(60, 60),
+        new THREE.MeshStandardMaterial({ color: 0x4b515c, roughness: 0.95 }),
+      );
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = -0.5; // a little lower than 0
+      ground.receiveShadow = true;
+      scene.add(ground);
+
+      const sphere = new THREE.Mesh(
+        new THREE.SphereGeometry(1, 32, 16),
+        new THREE.MeshStandardMaterial({
+          color: 0x7dd3fc,
+          roughness: 0.35,
+          metalness: 0.1,
+        }),
+      );
+      sphere.position.set(-2, 1, -2);
+      sphere.castShadow = true;
+      scene.add(sphere);
+
+      // single triangle slightly in front of sphere (towards camera)
+      const triGeom = new THREE.BufferGeometry();
+      triGeom.setAttribute(
+        "position",
+        new THREE.BufferAttribute(
+          new Float32Array([1, 2.2, -0.5, 3, 0.5, -0.8, 0.5, 0.3, 1.0]),
+          3,
+        ),
+      );
+      triGeom.computeVertexNormals();
+      const triangle = new THREE.Mesh(
+        triGeom,
+        new THREE.MeshStandardMaterial({
+          color: 0xfca5a5,
+          side: THREE.DoubleSide,
+          roughness: 0.4,
+        }),
+      );
+      triangle.castShadow = true;
+      scene.add(triangle);
+
+      // optional grid helper
+      const grid = new THREE.GridHelper(60, 60, 0x3b3f4c, 0x21242c);
+      grid.position.y = -0.499;
+      scene.add(grid);
+
+      // Transform controls for objects
+      const tcontrols = new TransformControls(camera, renderer.domElement);
+      tcontrols.addEventListener("dragging-changed", (e) => {
+        controls.enabled = !e.value;
+      });
+      scene.add(tcontrols);
+
+      // -----------------------------------
+      // Secondary camera rig (switchable persp/ortho) with visible image plane
+      // -----------------------------------
+      const camRig = new THREE.Group(); // rig transform == camera origin
+      scene.add(camRig);
+      camRig.position.set(0, 0, 0); // at origin initially
+
+      // two cameras to switch between
+      const perspCam = new THREE.PerspectiveCamera(50, 1, 0.01, 200);
+      const orthoParams = { w: 6, h: 4 };
+      const orthoCam = new THREE.OrthographicCamera(
+        -orthoParams.w / 2,
+        orthoParams.w / 2,
+        orthoParams.h / 2,
+        -orthoParams.h / 2,
+        0.01,
+        200,
+      );
+
+      // aim -w (negative z) direction by default
+      perspCam.position.set(0, 0, 0);
+      perspCam.lookAt(0, 0, -1);
+      orthoCam.position.set(0, 0, 0);
+      orthoCam.lookAt(0, 0, -1);
+
+      let activeSecCam = perspCam;
+      camRig.add(perspCam);
+
+      // Image plane gizmo (wireframe) + labels
+      const gizmoGroup = new THREE.Group();
+      camRig.add(gizmoGroup);
+
+      // simple camera axes (local u,v,w)
+      const localAxes = new THREE.AxesHelper(0.75);
+      gizmoGroup.add(localAxes);
+
+      // image plane geometry as wireframe rectangle at distance f (persp) or z=-1 (ortho)
+      const imgPlane = new THREE.LineSegments(
+        new THREE.BufferGeometry(),
+        new THREE.LineBasicMaterial({ color: 0x88cc88 }),
+      );
+      gizmoGroup.add(imgPlane);
+
+      const makeDimLabel = (text) => {
+        const el = document.createElement("div");
+        el.textContent = text;
+        el.style.color = "#c7ffb3";
+        el.style.fontSize = "11px";
+        el.style.background = "rgba(0,64,0,.45)";
+        el.style.padding = "2px 4px";
+        el.style.borderRadius = "6px";
+        return new CSS2DObject(el);
+      };
+      const widthLabel = makeDimLabel("W");
+      const heightLabel = makeDimLabel("H");
+      gizmoGroup.add(widthLabel);
+      gizmoGroup.add(heightLabel);
+
+      // parameters for secondary cam & image plane
+      const params = {
+        projection: "perspective", // 'perspective' | 'orthographic'
+        focalLength: 35, // mm, used with filmGauge to set FOV
+        filmGauge: 35, // mm, default 35mm
+        planeW: 4, // world-units width of image plane (teaching visual)
+        planeH: 3, // world-units height of image plane
+        pixelW: 320, // pixel image width (for i,j mapping)
+        pixelH: 180, // pixel image height
+        showGizmo: true,
+
+        // single pixel to visualize
+        i: 160,
+        j: 90,
+        showPixelRay: true,
+        showAllRays: false,
+        cullAtHit: true,
+
+        // object transform UI
+        transformTarget: "none", // 'none' | 'sphere' | 'triangle'
+        transformMode: "translate", // 'translate' | 'rotate' | 'scale'
+        showHandles: false,
+        showGround: true,
+
+        // rig transform (position & look target)
+        rigPx: 0,
+        rigPy: 1,
+        rigPz: 6,
+        rigTx: 0,
+        rigTy: 0,
+        rigTz: 1,
+      };
+
+      function switchProjection(mode) {
+        if (mode === "orthographic") {
+          camRig.remove(perspCam);
+          camRig.add(orthoCam);
+          activeSecCam = orthoCam;
+        } else {
+          camRig.remove(orthoCam);
+          camRig.add(perspCam);
+          activeSecCam = perspCam;
+        }
+        updateCamera();
+        updateImagePlane();
+      }
+
+      function updateCamera() {
+        if (params.projection === "perspective") {
+          perspCam.near = perspCam.setFocalLength(params.focalLength);
+          perspCam.aspect = params.planeW / params.planeH;
+          perspCam.filmGauge = params.filmGauge;
+          perspCam.near = Math.max(
+            0.1,
+            params.focalLength / (params.filmGauge / params.planeW),
+          );
+
+          perspCam.updateProjectionMatrix();
+        } else {
+          // orthographic: adjust size to match planeW/H
+          orthoCam.left = -params.planeW / 2;
+          orthoCam.right = params.planeW / 2;
+          orthoCam.top = params.planeH / 2;
+          orthoCam.bottom = -params.planeH / 2;
+          orthoCam.updateProjectionMatrix();
+        }
+      }
+      updateCamera();
+
+      // Update image plane wireframe & labels
+      function updateImagePlane() {
+        // compute four corners in the camera local space
+        let z = 0; // default plane depth for ortho
+        let halfW = params.planeW / 2;
+        let halfH = params.planeH / 2;
+        if (params.projection === "perspective") {
+          // for perspective, place plane at distance proportional to focal length
+          z = -Math.max(
+            0.1,
+            params.focalLength / (params.filmGauge / params.planeW),
+          );
+        }
+        const corners = [
+          new THREE.Vector3(-halfW, halfH, z),
+          new THREE.Vector3(halfW, halfH, z),
+          new THREE.Vector3(halfW, -halfH, z),
+          new THREE.Vector3(-halfW, -halfH, z),
+        ];
+        const pos = new Float32Array([
+          // edges
+          corners[0].x,
+          corners[0].y,
+          corners[0].z,
+          corners[1].x,
+          corners[1].y,
+          corners[1].z,
+          corners[1].x,
+          corners[1].y,
+          corners[1].z,
+          corners[2].x,
+          corners[2].y,
+          corners[2].z,
+          corners[2].x,
+          corners[2].y,
+          corners[2].z,
+          corners[3].x,
+          corners[3].y,
+          corners[3].z,
+          corners[3].x,
+          corners[3].y,
+          corners[3].z,
+          corners[0].x,
+          corners[0].y,
+          corners[0].z,
+          // diagonals (optional)
+          // corners[0].x,
+          // corners[0].y,
+          // corners[0].z,
+          // corners[2].x,
+          // corners[2].y,
+          // corners[2].z,
+          // corners[1].x,
+          // corners[1].y,
+          // corners[1].z,
+          // corners[3].x,
+          // corners[3].y,
+          // corners[3].z,
+        ]);
+        imgPlane.geometry.setAttribute(
+          "position",
+          new THREE.BufferAttribute(pos, 3),
+        );
+        imgPlane.geometry.computeBoundingSphere();
+
+        // place the dimension labels at midpoints
+        const midTop = corners[0].clone().add(corners[1]).multiplyScalar(0.5);
+        const midRight = corners[1].clone().add(corners[2]).multiplyScalar(0.5);
+        widthLabel.position.copy(midTop);
+        heightLabel.position.copy(midRight);
+        widthLabel.element.textContent = `W=${params.planeW.toFixed(2)}`;
+        heightLabel.element.textContent = `H=${params.planeH.toFixed(2)}`;
+      }
+      updateImagePlane();
+      updateCamera();
+
+      // update rig transform from params
+      function applyRigTransform() {
+        camRig.position.set(params.rigPx, params.rigPy, params.rigPz);
+        const target = new THREE.Vector3(
+          params.rigPx + params.rigTx,
+          params.rigPy + params.rigTy,
+          params.rigPz + params.rigTz,
+        );
+        camRig.lookAt(target);
+      }
+      applyRigTransform();
+
+      // -----------------------------------
+      // Ray visualization
+      // -----------------------------------
+      const rayGroup = new THREE.Group();
+      scene.add(rayGroup);
+      const rayMat = new THREE.LineBasicMaterial({ color: 0x00ffff });
+      const rayMatHit = new THREE.LineBasicMaterial({ color: 0xffcc00 });
+
+      const raycaster = new THREE.Raycaster();
+      const rayTargets = [sphere, triangle, ground];
+
+      function ndcFromPixel(i, j, W, H) {
+        const x = ((i + 0.5) / W) * 2 - 1;
+        const y = 1 - ((j + 0.5) / H) * 2;
+        return new THREE.Vector2(x, y);
+      }
+
+      function computeRay(ndc) {
+        // setFromCamera works for both perspective & orthographic
+        const cam = activeSecCam;
+        raycaster.setFromCamera(ndc, cam);
+        return {
+          origin: raycaster.ray.origin.clone(),
+          dir: raycaster.ray.direction.clone(),
+        };
+      }
+
+      function firstHit(origin, dir) {
+        raycaster.set(origin, dir);
+        const hits = raycaster.intersectObjects(rayTargets, true);
+        return hits.length ? hits[0] : null;
+      }
+
+      function drawSingleRay() {
+        // remove previous
+        const old = rayGroup.getObjectByName("single");
+        if (old) rayGroup.remove(old);
+        if (!params.showPixelRay) return;
+
+        const ndc = ndcFromPixel(
+          params.i,
+          params.pixelH - params.j,
+          params.pixelW,
+          params.pixelH,
+        );
+        const { origin, dir } = computeRay(ndc);
+
+        const L = 100; // max length
+        let end = origin.clone().add(dir.clone().multiplyScalar(L));
+        let mat = rayMat;
+        if (params.cullAtHit) {
+          const hit = firstHit(origin, dir);
+          if (hit) {
+            end.copy(hit.point);
+            mat = rayMatHit;
+          }
+        }
+
+        const geo = new THREE.BufferGeometry().setFromPoints([origin, end]);
+        const line = new THREE.Line(geo, mat);
+        line.name = "single";
+        rayGroup.add(line);
+      }
+
+      function drawAllRays() {
+        const old = rayGroup.getObjectByName("all");
+        if (old) rayGroup.remove(old);
+        if (!params.showAllRays) return;
+
+        const cam = activeSecCam;
+        const nx = Math.max(4, params.pixelW / 4);
+        const ny = Math.max(4, params.pixelH / 4);
+        const stepX = params.pixelW / nx;
+        const stepY = params.pixelH / ny;
+
+        const positions = [];
+        const colors = [];
+        const cull = params.cullAtHit;
+
+        for (let yi = 0; yi < ny; yi++) {
+          for (let xi = 0; xi < nx; xi++) {
+            const i = Math.floor((xi + 0.5) * stepX);
+            const j = Math.floor((yi + 0.5) * stepY);
+            const ndc = ndcFromPixel(i, j, params.pixelW, params.pixelH);
+            const { origin, dir } = computeRay(ndc);
+            let end = origin.clone().add(dir.clone().multiplyScalar(60));
+            let color = new THREE.Color(0x00ffff);
+            if (cull) {
+              const hit = firstHit(origin, dir);
+              if (hit) {
+                end.copy(hit.point);
+                color.set(0xffcc00);
+                positions.push(
+                  origin.x,
+                  origin.y,
+                  origin.z,
+                  end.x,
+                  end.y,
+                  end.z,
+                );
+                colors.push(
+                  color.r,
+                  color.g,
+                  color.b,
+                  color.r,
+                  color.g,
+                  color.b,
+                );
+              }
+            } else {
+              positions.push(origin.x, origin.y, origin.z, end.x, end.y, end.z);
+              colors.push(color.r, color.g, color.b, color.r, color.g, color.b);
+            }
+          }
+        }
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(positions, 3),
+        );
+        geo.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+        const mat = new THREE.LineBasicMaterial({ vertexColors: true });
+        const lines = new THREE.LineSegments(geo, mat);
+        lines.name = "all";
+        rayGroup.add(lines);
+      }
+
+      // -----------------------------------
+      // Bottom-right secondary camera preview (set viewport & scissor)
+      // -----------------------------------
+      const pixelLabel = document.getElementById("pixelLabel");
+      function renderSecondaryPreview() {
+        const w = renderer.domElement.width / renderer.getPixelRatio();
+        const h = renderer.domElement.height / renderer.getPixelRatio();
+        const vw = params.pixelW;
+        const vh = params.pixelH;
+        const x = 10;
+        const y = 10; // bottom-right padding
+
+        renderer.setScissorTest(true);
+        renderer.setViewport(w - vw - x, y, vw, vh);
+        renderer.setScissor(w - vw - x, y, vw, vh);
+        renderer.setClearColor(0x000000, 1);
+        renderer.clearDepth();
+        renderer.render(scene, activeSecCam);
+        renderer.setScissorTest(false);
+
+        pixelLabel.textContent = `Pixel image: ${params.pixelW} × ${params.pixelH} *Image is not actually rendering using raycasting.`;
+        pixelLabel.style.right = "12px";
+        pixelLabel.style.bottom = `${12 + vh + 8}px`;
+      }
+
+      // -----------------------------------
+      // GUI
+      // -----------------------------------
+      const gui = new GUI({ title: "Raycast Demo Controls" });
+      const camFolder = gui.addFolder("In-Scene Camera Params");
+      camFolder
+        .add(params, "projection", ["perspective", "orthographic"])
+        .name("Projection")
+        .onChange((v) => {
+          params.projection = v;
+          switchProjection(v);
+        })
+        .listen();
+      camFolder
+        .add(params, "focalLength", 10, 120, 1)
+        .name("Focal Length (mm)")
+        .onChange(() => {
+          updateCamera();
+          updateImagePlane();
+        })
+        .listen();
+      camFolder
+        .add(params, "planeW", 0.5, 10, 0.1)
+        .name("ImagePlane W")
+        .onChange(() => {
+          updateCamera();
+          updateImagePlane();
+        })
+        .listen();
+      camFolder
+        .add(params, "planeH", 0.5, 10, 0.1)
+        .name("ImagePlane H")
+        .onChange(() => {
+          updateCamera();
+          updateImagePlane();
+        })
+        .listen();
+      camFolder
+        .add(params, "pixelW", 16, 1024, 1)
+        .name("Pixel W")
+        .onChange(() => {
+          drawSingleRay();
+          drawAllRays();
+        })
+        .listen();
+      camFolder
+        .add(params, "pixelH", 16, 1024, 1)
+        .name("Pixel H")
+        .onChange(() => {
+          drawSingleRay();
+          drawAllRays();
+        })
+        .listen();
+      camFolder
+        .add(params, "showGizmo")
+        .name("Show Gizmo")
+        .onChange((v) => {
+          gizmoGroup.visible = v;
+        });
+
+      const rigFolder = gui.addFolder("In-Scene Camera Rig Transform");
+      const bounds = 20;
+      rigFolder
+        .add(params, "rigPx", -bounds, bounds, 0.01)
+        .name("Pos X")
+        .onChange(applyRigTransform)
+        .listen();
+      rigFolder
+        .add(params, "rigPy", -bounds, bounds, 0.01)
+        .name("Pos Y")
+        .onChange(applyRigTransform)
+        .listen();
+      rigFolder
+        .add(params, "rigPz", -bounds, bounds, 0.01)
+        .name("Pos Z")
+        .onChange(applyRigTransform)
+        .listen();
+      rigFolder
+        .add(params, "rigTx", -20, 20, 0.01)
+        .name("LookAt X")
+        .onChange(applyRigTransform)
+        .listen();
+      rigFolder
+        .add(params, "rigTy", -20, 20, 0.01)
+        .name("LookAt Y")
+        .onChange(applyRigTransform)
+        .listen();
+      rigFolder
+        .add(params, "rigTz", -20, 20, 0.01)
+        .name("LookAt Z")
+        .onChange(applyRigTransform)
+        .listen();
+
+      const rayFolder = gui.addFolder("Ray Visualization");
+      rayFolder
+        .add(params, "showPixelRay")
+        .name("Show pixel (i,j)'s ray")
+        .onChange(drawSingleRay);
+      rayFolder
+        .add(params, "i", 0, 1919, 1)
+        .name("i (col)")
+        .onChange(drawSingleRay)
+        .listen();
+      rayFolder
+        .add(params, "j", 0, 1079, 1)
+        .name("j (row)")
+        .onChange(drawSingleRay)
+        .listen();
+      rayFolder
+        .add(params, "cullAtHit")
+        .name("Intersections Only")
+        .onChange(() => {
+          drawSingleRay();
+          drawAllRays();
+        });
+      rayFolder
+        .add(params, "showAllRays")
+        .name("Every 4th ray")
+        .onChange(drawAllRays);
+
+      const objFolder = gui.addFolder("Objects & Handles");
+      objFolder
+        .add(params, "transformTarget", ["none", "sphere", "triangle"])
+        .name("Handle Target")
+        .onChange((v) => {
+          if (v === "sphere") tcontrols.attach(sphere);
+          else if (v === "triangle") tcontrols.attach(triangle);
+          else tcontrols.detach();
+        });
+      objFolder
+        .add(params, "transformMode", ["translate", "rotate", "scale"])
+        .name("Handle Mode")
+        .onChange((m) => {
+          tcontrols.setMode(m);
+        });
+      objFolder
+        .add(params, "showHandles")
+        .name("Show Handles")
+        .onChange((v) => {
+          if (!v) tcontrols.detach();
+          else if (params.transformTarget === "sphere") {
+            tcontrols.attach(sphere);
+            tcontrols.visible = v;
+          } else if (params.transformTarget === "triangle") {
+            tcontrols.attach(triangle);
+            tcontrols.visible = v;
+          }
+        });
+      objFolder
+        .add(params, "showGround")
+        .name("Show Floor")
+        .onChange((v) => {
+          ground.visible = v;
+          rayTargets[2] = v ? ground : sphere;
+        });
+
+      // initialize state
+      ground.visible = params.showGround;
+      gizmoGroup.visible = params.showGizmo;
+      tcontrols.visible = params.showHandles;
+
+      // Keep i/j bounds in sync with pixelW/H
+      function clampIJ() {
+        params.i = Math.max(0, Math.min(params.pixelW - 1, params.i | 0));
+        params.j = Math.max(0, Math.min(params.pixelH - 1, params.j | 0));
+      }
+
+      // -----------------------------------
+      // Animation loop
+      // -----------------------------------
+      const clock = new THREE.Clock();
+      function animate() {
+        const t = clock.getElapsedTime();
+        controls.update();
+
+        clampIJ();
+        // dynamic rays (cheap enough) – rebuild each frame only when toggles on
+        if (params.showPixelRay) drawSingleRay();
+        if (params.showAllRays) drawAllRays();
+
+        renderer.setViewport(0, 0, innerWidth, innerHeight);
+        renderer.setScissorTest(false);
+        renderer.setClearColor(0x0e1117, 1);
+        renderer.render(scene, camera);
+
+        renderSecondaryPreview();
+        labelRenderer.render(scene, camera);
+
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      // -----------------------------------
+      // Handle resize
+      // -----------------------------------
+      addEventListener("resize", () => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+        labelRenderer.setSize(innerWidth, innerHeight);
+      });
+    </script>
+  </body>
+</html>

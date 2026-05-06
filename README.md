@@ -1,31 +1,17 @@
-# Minimal Research Theme :microscope:
+# Joonho Kim Profile
 
-Just a plain, simple and elegant one-page theme for research/academia.
+Static personal profile page.
 
-## Just turn the knobs!
-* For those who just want a quick website, just make changes to style.js.
-* For those who know web dev, the browser is yours, play around.
+## Structure
 
-## Examples
-These are some examples of how you can get creative.
+- `index.html` is the main page.
+- `assets/style.css` contains the site styling.
+- `images/` contains only images used by the current page and favicons.
+- `courses/csc317-2025-09/` contains linked course demos and showcase pages.
+- `sync.sh` sets up Mutagen sync to the public web directory.
 
-with style.js and style.css:
-![Example1](assets/example1.png)
+## Local Check
 
-with style-1.js and style-1.css:
-![Example2](assets/example2.png)
-
-with style-2.js and style-2.css:
-![Example3](assets/example3.png)
-
-with style-3.js and style-3.css:
-![Example4](assets/example4.png)
-
-## Currently Living @
-[Sebastin Santy](http://sebastinsanty.com/), [Pratik Joshi](https://pratikmjoshi.github.io/)
-
-If you are using this template, thank you! Do send a pull request if you would like your name here.
-
-
-
-
+```sh
+tidy -q -e index.html
+```

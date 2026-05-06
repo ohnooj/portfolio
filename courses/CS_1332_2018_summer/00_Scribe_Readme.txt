@@ -1,3 +1,0 @@
-This folder is a note bank of Joonho's lectures for CS 1332 Summer 2018 from students.  Everybody takes notes differently, so I wanted to display that diversity.  This also benefits the scribes by forcing them to review and understand whether their notes are correct.  Errors can be brought up through student review; please message me if you find an error.
-
-I thank the students for contributing to this resource.
