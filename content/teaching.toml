@@ -1,0 +1,82 @@
+[[items]]
+date = "Fall 2025"
+title = "CSC317: Computer Graphics"
+meta = "Prof. Karan Singh, **Joonho Kim** / University of Toronto"
+
+[[items.links]]
+label = "demos"
+href = "./courses/csc317-2025-09/demos/"
+
+[items.image]
+src = "images/csc317sm.jpg"
+alt = "CSC317 Computer Graphics course thumbnail"
+href = "./courses/csc317-2025-09/demos/"
+
+[[items]]
+date = "Fall 2024"
+title = "CSC108: Introduction to Computer Programming"
+meta = "Prof. Michelle Craig, **Joonho Kim**, Co-Instructors / University of Toronto"
+
+[[items.links]]
+label = "eval"
+href = "https://drive.google.com/file/d/1-XvP-trO8oaOYCmxPTv7s-CY1wwu5oQC/view?usp=drive_link"
+
+[items.image]
+src = "images/csc108sm.jpg"
+alt = "CSC108 course thumbnail"
+
+[[items]]
+date = "Summer 2024"
+title = "CSC108: Introduction to Computer Programming"
+meta = "**Joonho Kim** / University of Toronto"
+
+[[items.links]]
+label = "eval"
+href = "https://drive.google.com/file/d/1-W0iZ03Hw9NToLey3C1fzJoshQ4QNSE9/view?usp=drive_link"
+
+[items.image]
+src = "images/csc108sm.jpg"
+alt = "CSC108 course thumbnail"
+
+[[items]]
+date = "Winter 2024"
+title = "CSC148: Introduction to Computer Science"
+meta = "Prof. Jonathan Calver, **Joonho Kim**, Co-Instructors / University of Toronto"
+
+[[items.links]]
+label = "eval"
+href = "https://drive.google.com/file/d/1-X8SFWYivFYOGfVggtsQf-e2DSLHiR9o/view?usp=drive_link"
+
+[items.image]
+src = "images/csc148sm.jpg"
+alt = "CSC148 course thumbnail"
+
+[[items]]
+date = "Fall 2023"
+title = "CSC108: Introduction to Computer Programming"
+meta = "Prof. Jacqueline Smith, **Joonho Kim**, Co-Instructors / University of Toronto"
+
+[[items.links]]
+label = "eval"
+href = "https://drive.google.com/file/d/1-XSUxMgmVnwMJpUdQSUbGkCC7Cyv--WI/view?usp=drive_link"
+
+[items.image]
+src = "images/csc108sm.jpg"
+alt = "CSC108 course thumbnail"
+
+[[items]]
+date = "Summer 2018"
+title = "CS 1332: Data Structures & Algorithms"
+meta = "Dr. Mary Hudacheck-Buswell, **Joonho Kim** / Georgia Institute of Technology"
+
+[[items.links]]
+label = "notes"
+href = "https://drive.google.com/drive/folders/1BxF2vnQw_B9yKFRoYeORMG0s6ZRlML1W?usp=sharing"
+
+[[items.links]]
+label = "eval"
+href = "https://docs.google.com/document/d/1nYWg8T8fdf2tSfnI-tPQj2BEenR8QVim/edit?usp=drive_link&ouid=114295537222341256127&rtpof=true&sd=true"
+
+[items.image]
+src = "images/cs1332sm.jpg"
+alt = "CS 1332 course thumbnail"

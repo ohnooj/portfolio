@@ -7,6 +7,9 @@ REMOTE_HOST="${REMOTE_HOST:-medusa.dgp.toronto.edu}"
 REMOTE_USER="${REMOTE_USER:-joonho}"
 REMOTE_PATH="${REMOTE_PATH:-/www/public_user/joonho/}"
 REMOTE_URL="${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}"
+SYNC_IGNORES=(
+  "/courses/csc317-2025-09/showcase"
+)
 
 usage() {
   cat <<USAGE
@@ -27,6 +30,12 @@ Environment overrides:
   REMOTE_HOST=${REMOTE_HOST}
   REMOTE_PATH=${REMOTE_PATH}
 USAGE
+}
+
+ignore_args() {
+  for path in "${SYNC_IGNORES[@]}"; do
+    printf '%s\n' --ignore "${path}"
+  done
 }
 
 require_mutagen() {
@@ -52,6 +61,7 @@ create_session() {
     --default-directory-mode-alpha 0755 \
     --default-file-mode-beta 0644 \
     --default-directory-mode-beta 0755 \
+    $(ignore_args) \
     "${REMOTE_URL}" \
     "${LOCAL_PATH}"
 }

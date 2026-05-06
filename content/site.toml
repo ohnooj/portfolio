@@ -1,0 +1,59 @@
+title = "Joonho Kim"
+author = "Joonho Kim"
+theme_color = "#f4efe8"
+font_url = "https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap"
+announcement_label = "Fall 2026"
+
+[nav]
+name = "Joonho Kim"
+email = "joonho [at] dgp.toronto.edu"
+
+[[nav.links]]
+label = "linkedin"
+href = "https://www.linkedin.com/in/ohnooj/"
+
+[[nav.links]]
+label = "cv"
+href = "https://docs.google.com/document/d/1C9caIxgMciVX_mbRGP1RlPw0krqtv_U1bb9I5Sk-pqQ/edit?usp=sharing"
+
+[portrait]
+src = "images/JoonhoKim2.jpg"
+alt = "Joonho Kim standing in a warm interior beside a gold wall panel and olive tree"
+caption = "Soli Deo gloria / John 8:32"
+
+[[icons]]
+rel = "apple-touch-icon"
+sizes = "180x180"
+href = "images/nicons/dove_icon_180.png"
+
+[[icons]]
+rel = "icon"
+type = "image/png"
+sizes = "32x32"
+href = "images/nicons/dove_icon_32.png"
+
+[[icons]]
+rel = "icon"
+type = "image/png"
+sizes = "16x16"
+href = "images/nicons/dove_icon_16.png"
+
+[[sections]]
+id = "publications"
+title = "Publications"
+file = "publications.toml"
+
+[[sections]]
+id = "projects"
+title = "Projects"
+file = "projects.toml"
+
+[[sections]]
+id = "teaching"
+title = "Teaching"
+file = "teaching.toml"
+
+[[sections]]
+id = "formation"
+title = "Formation"
+file = "formation.toml"

@@ -1,0 +1,30 @@
+[[items]]
+date = "2025"
+title = "Squidgets: Sketch-based Widget Design for Scene Manipulation"
+meta = "**Joonho Kim**, Fanny Chevalier, Karan Singh / [ACM UIST 2025](https://uist.acm.org/2025/)"
+award = "Honorable Mention Award, top 5%"
+description = "Sketch-based widgets for authoring scene manipulation behavior directly in context."
+
+[[items.links]]
+label = "Project page"
+href = "https://www.dgp.toronto.edu/projects/squidgets/"
+
+[items.image]
+src = "images/2025-squidgets.jpg"
+alt = "Squidgets thumbnail"
+href = "https://www.dgp.toronto.edu/projects/squidgets/"
+
+[[items]]
+date = "2021"
+title = "Optimizing UI Layouts for Deformable Face-Rig Manipulation"
+meta = "**Joonho Kim**, Karan Singh / [ACM SIGGRAPH 2021](https://s2021.siggraph.org)"
+description = "Interface layout optimization for faster, clearer control of deformable facial animation rigs."
+
+[[items.links]]
+label = "Project page"
+href = "https://www.dgp.toronto.edu/projects/face-rig-ui-optimization/"
+
+[items.image]
+src = "images/2021-optim.jpg"
+alt = "Face UI thumbnail"
+href = "https://www.dgp.toronto.edu/projects/face-rig-ui-optimization/"
