@@ -1,11 +1,13 @@
 // Initialize font properties
 const fontname = "Roboto+Mono";
-const fontweights = [300, 400]
+const fontweights = [300, 400];
 
 // Color properties
-const basecolor = "#777";
-const accentcolor = "#007";
-const highlightcolor = "#111";
+const basecolor = "#24231f";
+const accentcolor = "#6f7f3f";
+const highlightcolor = "#24231f";
+const panelcolor = "#9a7a3e";
+const woodcolor = "#7b5634";
 
 // const basecolor = "#888";
 // const accentcolor = "#222";
@@ -14,7 +16,7 @@ const highlightcolor = "#111";
 // Body properties
 const bodyfontweight = 300;
 const bodyfontsize = "12pt";
-const backgroundcolor = "#FFFAF0";
+const backgroundcolor = "#f5efe2";
 
 // Link properties
 const acolor = accentcolor;
@@ -32,15 +34,14 @@ const menudecoration = "none";
 // const menuhoverdecoration = "none"; //none, underline, overline, dotted, color (https://www.w3schools.com/cssref/pr_text_text-decoration.asp)
 
 // Header properties
-const headercolor = accentcolor;
+const headercolor = woodcolor;
 const headerfontsize = "18pt";
 const headerdecoration = "none";
 const namecolor = highlightcolor;
 const namefontsize = "23pt";
 
-
 // Publication properties
-const ptitlecolor = accentcolor;
+const ptitlecolor = highlightcolor;
 const ptitlefontsize = bodyfontsize;
 const ptitleweight = bodyfontweight;
 const ptitledecoration = "none";
@@ -54,7 +55,7 @@ const authorstyle = "normal";
 const selfcolor = highlightcolor;
 const selfweight = bodyfontweight;
 const selfdecoration = "none";
-const selfstyle = "normal";
+const selfstyle = "bold";
 
 const tagcolor = accentcolor;
 const tagweight = bodyfontweight;
@@ -63,7 +64,7 @@ const tagstyle = "normal";
 
 const insttitlecolor = highlightcolor;
 const insttitlesize = "12px";
-const instyearcolor = accentcolor;
+const instyearcolor = woodcolor;
 const instyearsize = "11px";
 
 //     .institution {
@@ -76,7 +77,13 @@ const instyearsize = "11px";
 //         }
 
 // Works for sans serif, change otherwise
-$("head").append("<link href='https://fonts.googleapis.com/css2?family=" + fontname + ":wght@" + fontweights.join(';') + "&display=swap' rel='stylesheet' type='text/css'>");
+$("head").append(
+  "<link href='https://fonts.googleapis.com/css2?family=" +
+    fontname +
+    ":wght@" +
+    fontweights.join(";") +
+    "&display=swap' rel='stylesheet' type='text/css'>",
+);
 $("body").css("font-family", fontname);
 
 $("body").css("color", basecolor);
