@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GT Calendar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div>
+            <h1>GT Calendar</h1>
+            <p id="event-count">Loading events...</p>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="view-switch" role="group" aria-label="Preview view">
+            <button class="switch-button is-active" type="button" data-view="year">Year</button>
+            <button class="switch-button" type="button" data-view="month">Month</button>
+          </div>
+          <div class="help-popover-anchor">
+            <button class="icon-button help-button" id="app-help" type="button" aria-label="About this app" aria-haspopup="dialog" aria-expanded="false">
+              ?
+            </button>
+            <div class="help-popover" id="help-popover" role="dialog" aria-labelledby="help-title" hidden>
+              <div class="popover-header">
+                <h2 id="help-title">About GT Calendar</h2>
+                <button class="icon-button popover-close" id="help-close" type="button" aria-label="Close description">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                </button>
+              </div>
+              <div class="popover-content">
+                <p class="popover-lede">Build a custom Georgia Tech academic calendar and export it as an ICS file.</p>
+                <div class="popover-section">
+                  <h3>Use</h3>
+                  <ul>
+                    <li>Select events with the preset, year, term, and type filters.</li>
+                    <li>Preview the selection in Year or Month view.</li>
+                    <li>Choose Export ICS to download a calendar file.</li>
+                  </ul>
+                </div>
+                <div class="popover-section">
+                  <h3>Data</h3>
+                  <p>Events are extracted from Georgia Tech Registrar calendar sources:</p>
+                  <ul>
+                    <li><a href="https://registrar.gatech.edu/current-academic-calendar" target="_blank" rel="noopener">Current academic calendar</a></li>
+                    <li><a href="https://registrar.gatech.edu/future-academic-calendar" target="_blank" rel="noopener">Future academic calendar</a></li>
+                    <li><a href="https://registrar.gatech.edu/calevents/proxy" target="_blank" rel="noopener">Registrar calendar data endpoint</a></li>
+                  </ul>
+                </div>
+                <div class="popover-section">
+                  <h3>Sync</h3>
+                  <p>The generator refreshes current and future events from the Registrar while preserving past events from the existing ICS.</p>
+                </div>
+                <p class="popover-credit">Created with Codex. <a href="https://github.com/ohnooj/gatech-academic-calendar-exporter" target="_blank" rel="noopener">View source</a>.</p>
+              </div>
+            </div>
+          </div>
+          <button class="icon-button" id="prev-period" type="button" aria-label="Previous period">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <button class="icon-button" id="next-period" type="button" aria-label="Next period">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+          </button>
+          <button class="action-button" id="export-ics" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14" /></svg>
+            Export ICS
+          </button>
+        </div>
+      </header>
+
+      <aside class="filters" aria-label="Calendar filters">
+        <div class="filter-section">
+          <div class="section-title">Preset</div>
+          <label class="radio-row"><input type="radio" name="preset" value="essential" checked /><span>Essential</span></label>
+          <label class="radio-row"><input type="radio" name="preset" value="deadlines" /><span>Deadlines</span></label>
+          <label class="radio-row"><input type="radio" name="preset" value="all" /><span>All</span></label>
+        </div>
+        <div class="filter-section" id="years-filter">
+          <div class="section-title">Year</div>
+        </div>
+        <div class="filter-section" id="terms-filter">
+          <div class="section-title">Term</div>
+        </div>
+        <div class="filter-section" id="types-filter">
+          <div class="section-title">Type</div>
+        </div>
+      </aside>
+
+      <main class="calendar-panel">
+        <h2 id="period-title">Academic Calendar</h2>
+        <section id="calendar-view" class="year-grid" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <div id="tooltip" class="tooltip"></div>
+    <script src="events-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

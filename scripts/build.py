@@ -26,10 +26,19 @@ def external_attrs(href: str) -> str:
     return ' target="_blank" rel="noopener noreferrer"' if href.startswith(("http://", "https://")) else ""
 
 
-def anchor(item: dict, class_name: str = "") -> str:
+def localize_href(href: str, base_path: str) -> str:
+    if href.startswith(("http://", "https://", "#", "/", "mailto:")):
+        return href
+    if href.startswith("./"):
+        return f"{base_path}{href[2:]}"
+    return f"{base_path}{href}"
+
+
+def anchor(item: dict, class_name: str = "", base_path: str = "") -> str:
     class_attr = f' class="{escape(class_name)}"' if class_name else ""
     label = item.get("label", item.get("text", ""))
-    return f'<a{class_attr} href="{escape(item["href"])}"{external_attrs(item["href"])}>{escape(label)}</a>'
+    href = localize_href(item["href"], base_path) if base_path else item["href"]
+    return f'<a{class_attr} href="{escape(href)}"{external_attrs(href)}>{escape(label)}</a>'
 
 
 INLINE_TOKEN = re.compile(r"(\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)]+)\))")
@@ -56,15 +65,20 @@ def render_paragraphs(markdown: str) -> str:
     return "\n".join(f"            <p>{render_inline(paragraph)}</p>" for paragraph in paragraphs)
 
 
-def render_icon(icon: dict) -> str:
-    attrs = " ".join(f'{key}="{escape(value)}"' for key, value in icon.items())
+def render_icon(icon: dict, base_path: str = "") -> str:
+    attrs = []
+    for key, value in icon.items():
+        if key == "href" and base_path:
+            value = localize_href(str(value), base_path)
+        attrs.append(f'{key}="{escape(value)}"')
+    attrs = " ".join(attrs)
     return f"    <link {attrs} />"
 
 
-def render_nav(site: dict) -> str:
-    links = "\n".join(f"          {anchor(link)}" for link in site["nav"]["links"])
+def render_nav(site: dict, base_path: str = "./", link_base: str = "") -> str:
+    links = "\n".join(f"          {anchor(link, base_path=link_base)}" for link in site["nav"]["links"])
     return f"""      <header class="topbar">
-        <a class="wordmark" href="./">{escape(site["nav"]["name"])}</a>
+        <a class="wordmark" href="{escape(base_path)}">{escape(site["nav"]["name"])}</a>
         <nav class="top-links" aria-label="Contact and documents">
           <span>{escape(site["nav"]["email"])}</span>
 {links}
@@ -93,13 +107,20 @@ def render_opening(site: dict) -> str:
       </section>"""
 
 
-def render_links(links: list[dict] | None) -> str:
+def render_links(links: list[dict] | None, force_external: bool = False) -> str:
     if not links:
         return ""
-    return f'            <p class="links">{" ".join(anchor(link) for link in links)}</p>'
+    attrs = ' target="_blank" rel="noopener noreferrer"' if force_external else ""
+    anchors = []
+    for link in links:
+        if force_external:
+            anchors.append(f'<a href="{escape(link["href"])}"{attrs}>{escape(link.get("label", link.get("text", "")))}</a>')
+        else:
+            anchors.append(anchor(link))
+    return f'            <p class="links">{" ".join(anchors)}</p>'
 
 
-def render_media(image: dict | None) -> str:
+def render_media(image: dict | None, force_external: bool = False) -> str:
     if not image:
         return ""
 
@@ -111,28 +132,40 @@ def render_media(image: dict | None) -> str:
     if not image.get("href"):
         return f'            <div class="{class_name}">{img}</div>'
 
-    return f'            <a class="{class_name}" href="{escape(image["href"])}"{external_attrs(image["href"])}>{img}</a>'
+    attrs = ' target="_blank" rel="noopener noreferrer"' if force_external else external_attrs(image["href"])
+    return f'            <a class="{class_name}" href="{escape(image["href"])}"{attrs}>{img}</a>'
 
 
-def render_item(item: dict) -> str:
+def render_item(item: dict, force_external_links: bool = False) -> str:
+    if item.get("variant") == "link":
+        class_name = f'item item--link-only {item["class"]}' if item.get("class") else "item item--link-only"
+        attrs = ' target="_blank" rel="noopener noreferrer"' if force_external_links else external_attrs(item["href"])
+        description = f'\n              <p>{escape(item["description"])}</p>' if item.get("description") else ""
+        return f"""          <article class="{escape(class_name)}">
+            <div class="item-body">
+              <h3><a href="{escape(item["href"])}"{attrs}>{escape(item["title"])}</a></h3>{description}
+            </div>
+          </article>"""
+
     award = f'              <p class="award">{escape(item["award"])}</p>\n' if item.get("award") else ""
     description = f'              <p>{escape(item["description"])}</p>\n' if item.get("description") else ""
+    class_name = f'item {item["class"]}' if item.get("class") else "item"
 
-    return f"""          <article class="item">
+    return f"""          <article class="{escape(class_name)}">
             <p class="date">{escape(item["date"])}</p>
             <div class="item-body">
               <h3>{escape(item["title"])}</h3>
               <p class="meta">{render_inline(item["meta"])}</p>
-{award}{description}{render_links(item.get("links"))}
+{award}{description}{render_links(item.get("links"), force_external=force_external_links)}
             </div>
-{render_media(item.get("image"))}
+{render_media(item.get("image"), force_external=force_external_links)}
           </article>"""
 
 
-def render_section(section: dict) -> str:
+def render_section(section: dict, force_external_links: bool = False) -> str:
     heading_id = f'{section["id"]}-heading'
-    rows = read_toml(section["file"])["items"]
-    items = "\n\n".join(render_item(item) for item in rows)
+    rows = section["items"] if "items" in section else read_toml(section["file"])["items"]
+    items = "\n\n".join(render_item(item, force_external_links=force_external_links) for item in rows)
 
     return f"""      <section class="section" aria-labelledby="{escape(heading_id)}">
         <h2 class="section-label" id="{escape(heading_id)}">{escape(section["title"])}</h2>
@@ -142,21 +175,31 @@ def render_section(section: dict) -> str:
       </section>"""
 
 
-def build() -> None:
-    site = read_toml("site.toml")
-    page = f"""<!doctype html>
-<html lang="en">
-  <head>
+def render_head(site: dict, title: str, stylesheet: str, base_path: str = "") -> str:
+    return f"""  <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="author" content="{escape(site["author"])}" />
     <meta name="theme-color" content="{escape(site["theme_color"])}" />
-{chr(10).join(render_icon(icon) for icon in site["icons"])}
+{chr(10).join(render_icon(icon, base_path=base_path) for icon in site["icons"])}
     <link rel="stylesheet" href="{escape(site["font_url"])}" />
-    <link rel="stylesheet" href="assets/style.css" />
+    <link rel="stylesheet" href="{escape(stylesheet)}" />
 
-    <title>{escape(site["title"])}</title>
-  </head>
+    <title>{escape(title)}</title>
+  </head>"""
+
+
+def render_footer() -> str:
+    return """      <footer class="site-footer">
+        <span class="visitor-counter" data-visitor-counter aria-live="polite">views --</span>
+      </footer>"""
+
+
+def build() -> None:
+    site = read_toml("site.toml")
+    page = f"""<!doctype html>
+<html lang="en">
+{render_head(site, site["title"], "assets/style.css")}
 
   <body>
     <main class="site-shell">
@@ -165,12 +208,35 @@ def build() -> None:
 {render_opening(site)}
 
 {chr(10).join(render_section(section) for section in site["sections"])}
+{render_footer()}
     </main>
     <script src="assets/palette-samples.js" defer></script>
+    <script src="assets/visitor-counter.js" defer></script>
   </body>
 </html>
 """
     (ROOT / "index.html").write_text(page, encoding="utf-8")
+
+    thesis = read_toml("thesis.toml")
+    thesis_page = f"""<!doctype html>
+<html lang="en">
+{render_head(site, f'Thesis / {site["title"]}', "../assets/style.css", base_path="../")}
+
+  <body>
+    <main class="site-shell thesis-shell">
+
+      <section class="page-intro" aria-labelledby="page-title">
+        <h1 id="page-title">Joonho Kim</h1>
+      </section>
+
+{chr(10).join(render_section(section, force_external_links=True) for section in thesis["sections"])}
+{render_footer()}
+    </main>
+    <script src="../assets/visitor-counter.js" defer></script>
+  </body>
+</html>
+"""
+    (ROOT / "thesis" / "index.html").write_text(thesis_page, encoding="utf-8")
 
 
 if __name__ == "__main__":

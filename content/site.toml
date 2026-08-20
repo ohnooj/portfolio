@@ -57,3 +57,8 @@ file = "teaching.toml"
 id = "formation"
 title = "Formation"
 file = "formation.toml"
+
+[[sections]]
+id = "other"
+title = "Other"
+file = "other.toml"

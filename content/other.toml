@@ -1,0 +1,5 @@
+[[items]]
+title = "Georgia Tech Academic Calendar Exporter"
+variant = "link"
+href = "projects/gatech-calendar/"
+description = "Export the Georgia Tech academic calendar to ICS."
