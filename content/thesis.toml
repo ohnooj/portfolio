@@ -2,14 +2,17 @@
 class = "item--featured"
 date = "2026"
 title = "In-Situ Interactions for Direct Manipulation of Parameterized Scenes"
-meta = "**Joonho Kim** / PhD thesis, University of Toronto"
+meta = "**Joonho Kim** / University of Toronto"
 
 [[items.links]]
 label = "PDF"
 href = "thesis/thesis.pdf"
 
+[[items.links]]
+label = "Slides"
+href = "https://www.figma.com/slides/nIfH4qqLdw2pLfImNuqdTu"
+
 [items.image]
 src = "thesis/thesis-teaser.png"
 alt = "Thesis teaser figure"
 href = "thesis/thesis.pdf"
-
