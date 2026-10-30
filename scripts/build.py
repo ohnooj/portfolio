@@ -217,26 +217,6 @@ def build() -> None:
 """
     (ROOT / "index.html").write_text(page, encoding="utf-8")
 
-    thesis = read_toml("thesis.toml")
-    thesis_page = f"""<!doctype html>
-<html lang="en">
-{render_head(site, f'Thesis / {site["title"]}', "../assets/style.css", base_path="../")}
-
-  <body>
-    <main class="site-shell thesis-shell">
-
-      <section class="page-intro" aria-labelledby="page-title">
-        <h1 id="page-title">Joonho Kim</h1>
-      </section>
-
-{chr(10).join(render_section(section, force_external_links=True) for section in thesis["sections"])}
-{render_footer()}
-    </main>
-    <script src="../assets/visitor-counter.js" defer></script>
-  </body>
-</html>
-"""
-    (ROOT / "thesis" / "index.html").write_text(thesis_page, encoding="utf-8")
 
 
 if __name__ == "__main__":

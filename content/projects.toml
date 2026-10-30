@@ -1,4 +1,19 @@
 [[items]]
+date = "2026"
+title = "In-situ Visual Querying and Navigation of Dependency Graph Structures"
+meta = "**Joonho Kim**, Karan Singh"
+
+[[items.links]]
+label = "PDF"
+href = "thesis/visual-query.pdf"
+
+[items.image]
+src = "thesis/visual-query-teaser.png"
+alt = "Visual Querying teaser figure"
+href = "thesis/visual-query.pdf"
+
+
+[[items]]
 date = "2022"
 title = "Exploring Cartoon Priors for Neural Radiance Fields"
 meta = "[CSC 2529: Computational Imaging](https://www.cs.toronto.edu/~lindell/teaching/2529/2022/)"

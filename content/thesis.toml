@@ -1,73 +1,15 @@
-[[sections]]
-id = "thesis"
-title = "Thesis"
-
-[[sections.items]]
+[[items]]
 class = "item--featured"
 date = "2026"
 title = "In-Situ Interactions for Direct Manipulation of Parameterized Scenes"
 meta = "**Joonho Kim** / PhD thesis, University of Toronto"
 
-[[sections.items.links]]
+[[items.links]]
 label = "PDF"
-href = "./thesis.pdf"
+href = "thesis/thesis.pdf"
 
-[sections.items.image]
-src = "./thesis-teaser.png"
+[items.image]
+src = "thesis/thesis-teaser.png"
 alt = "Thesis teaser figure"
-href = "./thesis.pdf"
+href = "thesis/thesis.pdf"
 
-[[sections]]
-id = "projects"
-title = "Projects"
-
-[[sections.items]]
-date = "2026"
-title = "In-situ Visual Querying and Navigation of Dependency Graph Structures"
-meta = "**Joonho Kim**, Karan Singh"
-
-[[sections.items.links]]
-label = "PDF"
-href = "./visual-query.pdf"
-
-[sections.items.image]
-src = "./visual-query-teaser.png"
-alt = "Visual Querying teaser figure"
-href = "./visual-query.pdf"
-
-[[sections.items]]
-date = "2025"
-title = "Squidgets: Sketch-based Widget Design for Scene Manipulation"
-meta = "**Joonho Kim**, Fanny Chevalier, Karan Singh / [ACM UIST 2025](https://uist.acm.org/2025/)"
-award = "Honorable Mention Award, top 5%"
-
-[[sections.items.links]]
-label = "PDF"
-href = "https://www.dgp.toronto.edu/projects/squidgets/squidgets_pre-print.pdf"
-
-[[sections.items.links]]
-label = "Project page"
-href = "https://www.dgp.toronto.edu/projects/squidgets/"
-
-[sections.items.image]
-src = "../images/2025-squidgets.jpg"
-alt = "Squidgets thumbnail"
-href = "https://www.dgp.toronto.edu/projects/squidgets/"
-
-[[sections.items]]
-date = "2021"
-title = "Optimizing UI Layouts for Deformable Face-Rig Manipulation"
-meta = "**Joonho Kim**, Karan Singh / [ACM SIGGRAPH 2021](https://s2021.siggraph.org)"
-
-[[sections.items.links]]
-label = "PDF"
-href = "https://www.dgp.toronto.edu/projects/face-rig-ui-optimization/Optimizing_UI_Layouts_for_Deformable_Face-Rig_Manipulation.pdf"
-
-[[sections.items.links]]
-label = "Project page"
-href = "https://www.dgp.toronto.edu/projects/face-rig-ui-optimization/"
-
-[sections.items.image]
-src = "../images/2021-optim.jpg"
-alt = "Face UI thumbnail"
-href = "https://www.dgp.toronto.edu/projects/face-rig-ui-optimization/"

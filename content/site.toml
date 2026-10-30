@@ -44,6 +44,11 @@ title = "Publications"
 file = "publications.toml"
 
 [[sections]]
+id = "thesis"
+title = "Thesis"
+file = "thesis.toml"
+
+[[sections]]
 id = "projects"
 title = "Projects"
 file = "projects.toml"
